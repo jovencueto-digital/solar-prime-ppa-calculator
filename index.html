@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solar PPA Savings Calculator | The Solar Prime</title>
+<meta name="description" content="Estimate your monthly bill and savings with a Solar PPA in Illinois or Massachusetts. Enter your annual kWh usage from your utility bill.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="wrap masthead-inner">
+    <a class="brand" href="./" aria-label="The Solar Prime home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="8" fill="var(--sun)"/>
+        <g stroke="var(--sun)" stroke-width="3" stroke-linecap="round">
+          <path d="M20 3v5M20 32v5M3 20h5M32 20h5M8 8l3.5 3.5M28.5 28.5L32 32M8 32l3.5-3.5M28.5 11.5L32 8"/>
+        </g>
+      </svg>
+      <span>The Solar Prime</span>
+    </a>
+    <span class="masthead-note">Solar PPA calculator for Illinois &amp; Massachusetts</span>
+  </div>
+</header>
+
+<main class="wrap layout">
+  <section class="intro">
+    <h1>See what your electric bill looks like with a Solar PPA.</h1>
+    <p class="lede">Find the total kWh used over the last 12 months on your utility bill, enter it below, and compare your bill today with your estimated bill after enrolling. No panels to buy, no upfront cost.</p>
+  </section>
+
+  <form class="inputs" id="calc" novalidate>
+    <fieldset class="state-pick">
+      <legend>Where is the home?</legend>
+      <div class="segmented">
+        <input type="radio" name="state" id="st-il" value="IL" checked>
+        <label for="st-il">Illinois</label>
+        <input type="radio" name="state" id="st-ma" value="MA">
+        <label for="st-ma">Massachusetts</label>
+      </div>
+    </fieldset>
+
+    <div class="field big-field">
+      <label for="kwh">Total annual usage</label>
+      <div class="kwh-input">
+        <input id="kwh" name="kwh" type="text" inputmode="numeric" autocomplete="off" placeholder="12,000" aria-describedby="kwh-help kwh-error">
+        <span class="unit">kWh / year</span>
+      </div>
+      <p class="help" id="kwh-help">Usually shown as a 12-month usage history or chart on the bill. If you only see monthly kWh, add up all 12 months.</p>
+      <p class="error" id="kwh-error" role="alert" hidden></p>
+    </div>
+
+    <div class="field">
+      <label for="who">Prepared for <span class="optional">(optional)</span></label>
+      <input id="who" name="who" type="text" placeholder="Homeowner name" autocomplete="off">
+    </div>
+
+    <details class="assumptions">
+      <summary>Adjust rates and assumptions</summary>
+      <div class="grid2">
+        <div class="field">
+          <label for="uRate">Utility rate today ($/kWh, all-in)</label>
+          <input id="uRate" type="number" step="0.001" min="0.05" max="1">
+        </div>
+        <div class="field">
+          <label for="pRate">PPA rate ($/kWh)</label>
+          <input id="pRate" type="number" step="0.001" min="0.03" max="1">
+        </div>
+        <div class="field">
+          <label for="fixed">Utility fixed charge ($/month)</label>
+          <input id="fixed" type="number" step="1" min="0" max="100">
+        </div>
+        <div class="field">
+          <label for="offset">Usage covered by solar (%)</label>
+          <input id="offset" type="number" step="1" min="10" max="110">
+        </div>
+        <div class="field">
+          <label for="uEsc">Utility price increase (% / year)</label>
+          <input id="uEsc" type="number" step="0.1" min="0" max="15">
+        </div>
+        <div class="field">
+          <label for="pEsc">PPA escalator (% / year)</label>
+          <input id="pEsc" type="number" step="0.1" min="0" max="5">
+        </div>
+        <div class="field">
+          <label for="term">Agreement term (years)</label>
+          <input id="term" type="number" step="1" min="10" max="30">
+        </div>
+      </div>
+      <button type="button" class="link-btn" id="reset">Reset to state defaults</button>
+    </details>
+  </form>
+
+  <section class="results" id="results" aria-live="polite">
+    <div class="empty" id="empty">
+      <p>Enter the annual kWh from the bill to see the comparison.</p>
+    </div>
+
+    <div class="filled" id="filled" hidden>
+      <p class="prepared" id="prepared" hidden></p>
+      <div class="bills">
+        <article class="bill bill-now">
+          <h2>Your bill today</h2>
+          <p class="bill-total"><span id="nowMonthly">$0</span><small>/ month</small></p>
+          <dl class="lines">
+            <div><dt>Utility electricity</dt><dd id="nowLine">$0</dd></div>
+          </dl>
+          <p class="bill-foot"><span id="nowYear">$0</span> a year</p>
+        </article>
+
+        <article class="bill bill-ppa">
+          <h2>With a Solar PPA</h2>
+          <p class="bill-total"><span id="ppaMonthly">$0</span><small>/ month</small></p>
+          <dl class="lines">
+            <div><dt>Solar PPA payment</dt><dd id="ppaLine">$0</dd></div>
+            <div><dt>Remaining utility bill</dt><dd id="utilLine">$0</dd></div>
+          </dl>
+          <p class="bill-foot"><span id="ppaYear">$0</span> a year</p>
+        </article>
+      </div>
+
+      <div class="savings">
+        <div class="save-main">
+          <p class="save-label">Estimated savings</p>
+          <p class="save-figure"><span id="saveMonthly">$0</span> a month</p>
+        </div>
+        <dl class="save-stats">
+          <div><dt>First year</dt><dd id="saveYear1">$0</dd></div>
+          <div><dt>Over <span id="termLabel">25</span> years</dt><dd id="saveTerm">$0</dd></div>
+          <div><dt>Bill reduction</dt><dd id="savePct">0%</dd></div>
+        </dl>
+      </div>
+
+      <figure class="chart">
+        <figcaption>Yearly electricity cost: without solar vs. with a Solar PPA</figcaption>
+        <div class="legend">
+          <span><i class="sw sw-now"></i>Without solar</span>
+          <span><i class="sw sw-ppa"></i>With Solar PPA</span>
+        </div>
+        <div id="chart" class="chart-area"></div>
+      </figure>
+
+      <div class="actions">
+        <button type="button" class="btn" id="print">Print or save as PDF</button>
+      </div>
+
+      <details class="how">
+        <summary>How this estimate works</summary>
+        <ul>
+          <li>Bill today = annual kWh × utility rate ÷ 12. The utility rate is an all-in average (supply, delivery and fixed charges).</li>
+          <li>Solar PPA payment = annual kWh × share covered by solar × PPA rate ÷ 12.</li>
+          <li>Remaining utility bill = the fixed monthly charge plus the kWh solar doesn't cover, at the utility's per-kWh rate.</li>
+          <li>Long-term savings assume the utility price and PPA rate rise by the yearly percentages above.</li>
+        </ul>
+      </details>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap disclaimer">
+  <p>Estimates only, for average calculation purposes. Actual savings depend on the home's roof, system size, solar production, utility tariff, net metering rules and the final PPA terms. Default rates are 2026 statewide averages and can be changed under “Adjust rates and assumptions.” This is not a quote or an offer.</p>
+  <p>&copy; <span id="yr"></span> The Solar Prime</p>
+</footer>
+
+<script src="calculator.js"></script>
+</body>
+</html>
